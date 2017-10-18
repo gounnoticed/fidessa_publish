@@ -1,0 +1,9 @@
+[package]
+name = "fidessa_publish"
+version = "0.1.0"
+authors = ["justin"]
+
+[dependencies]
+    curl = "0.4.8"
+    chrono = "0.4"
+    pushover = "0.2.0"
