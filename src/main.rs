@@ -30,8 +30,6 @@ fn operate_window() -> bool {
 
     let wday = l.weekday().number_from_monday();
 
-    println!("Day of week {} time {:?}", wday, l);
-
     let minutes = std::time::Duration::from_secs(60 * 15);
     std::thread::park_timeout(minutes);
 
@@ -50,13 +48,19 @@ fn get_share_price() -> Option<String> {
     let mut data = Vec::new();
     {
         let mut transfer = handle.transfer();
-        transfer
-            .write_function(|new_data| {
-                data.extend_from_slice(new_data);
-                Ok(new_data.len())
-            })
-            .unwrap();
-        transfer.perform().unwrap();
+
+        if let Err(e) = transfer.write_function(|new_data| {
+            data.extend_from_slice(new_data);
+            Ok(new_data.len())
+        })
+        {
+            println!("write function failed in get_share_price() {:?}", e);
+            return optional;
+        }
+        if let Err(e) = transfer.perform() {
+            println!("transfer perform failed in get_share_price() {:?}", e);
+            return optional;
+        }
     }
 
     let mut st = String::from_utf8(data).unwrap();
